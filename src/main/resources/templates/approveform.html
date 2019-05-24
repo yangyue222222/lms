@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Leave Approval</title>
+</head>
+<body>
+<p> You are logged in as <span th:text="${user.username}"></span></p>
+
+<p> You are approving leave for <span th:text="${subordinate}"></span></p>
+<form action="#" th:action="@{'/approve/'+${leave.leaveid}}" th:object="${leave}" method="post">
+
+<input type="hidden" th:field="*{leaveid}"/>
+<input type="hidden" th:field="*{employeeid}"/>
+
+<p> Start Date: <span th:text="*{startDate}" /></span></p>
+<input type="hidden" th:field="*{startDate}"/>
+
+<p> End Date: <span th:text="*{endDate}" /></span></p>
+<input type="hidden" th:field="*{endDate}"/>
+
+<p> Type: <span th:text="*{leaveType}" /></span></p>
+<input type="hidden" th:field="*{leaveType}"/>
+
+<p> Reason: <span th:text="*{reason}" /></span></p>
+<input type="hidden" th:field="*{reason}"/>
+
+<p> Comments: <input type="text" th:field="*{managerComment}" /></p>
+
+<input type="submit" value="Approve"/>
+
+</form>
+
+<p>Other employees on leave during this period</p>
+<table border="1">
+<tr>
+	<th>Employee Id</th>
+	<th>Start Date</th>
+	<th>End Date</th>
+	<th>Type</th>
+	<th>Reason</th>
+	<th>Status</th>
+	<th>Manager Comments</th>
+</tr>
+<tr th:each="l : ${conflicts}" >
+       <td th:text="${l.employeeid}"></td>
+       <td th:text="${l.startDate}"></td>
+       <td th:text="${l.endDate}"></td>
+       <td th:text="${l.leaveType}"></td>
+       <td th:text="${l.reason}"></td>
+       <td th:text="${l.status}"></td>
+       <td th:text="${l.managerComment}"></td>
+</tr>
+</table>
+
+
+<p><a th:href="@{/viewsubleave}" >Back to Subordinate Leave</a></p>
+</body>
+</html>

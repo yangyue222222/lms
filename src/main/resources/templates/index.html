@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Index</title>
+</head>
+<body>
+<p>Welcome, <span th:text="${user.username}"></span></p>
+
+<p><a th:href="@{/applyform}">Apply for Leave</a></p>
+
+<p><a th:href="@{/viewleave}">View Leave</a></p>
+
+<p><a th:href="@{/viewsubleave}" th:if="${user.employeeType == 'Manager'}">View Subordinate Leave</a></p>
+
+<p><a th:href="@{/viewpending}" th:if="${user.employeeType == 'Manager'}">View Pending Leave Applications</a></p>
+
+<p><a th:href="@{/logout}">Logout</a></p>
+</body>
+</html>

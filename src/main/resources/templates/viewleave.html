@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>View Leave</title>
+</head>
+<body>
+
+<table border="1">
+<tr>
+<td>Annual Leave</td><td th:text="${user.annualLeave}"></td>
+</tr>
+<tr>
+<td>Medical Leave</td><td th:text="${user.medicalLeave}"></td>
+</tr>
+<tr>
+<td>Compensation Leave</td><td th:text="${user.compLeave}"></td>
+</tr>
+</table>
+
+<table border="1">
+<tr>
+	<td>Start Date</td>
+	<td>End Date</td>
+	<td>Type</td>
+	<td>Reason</td>
+	<td>Status</td>
+	<td>Manager Comments</td>
+	<td>Actions</td>
+</tr>
+<tr th:each="l : ${leave}" >
+       <td th:text="${l.startDate}"></td>
+       <td th:text="${l.endDate}"></td>
+       <td th:text="${l.leaveType}"></td>
+       <td th:text="${l.reason}"></td>
+       <td th:text="${l.status}"></td>
+       <td th:text="${l.managerComment}"></td>
+       <td th:if="${l.status == 'Updated' || l.status == 'Applied'}">
+       <a th:href="@{'/updateform/'+${l.leaveid}}">Update</a><br />
+       <a th:href="@{'/delete/'+${l.leaveid}}">Delete</a></td>
+       <td th:if="${l.status == 'Approved'}">
+       <a th:href="@{'/cancel/'+${l.leaveid}}">Cancel</a></td>
+</tr>
+</table>
+<p><a th:href="@{/applyform}">Apply for Leave</a></p>
+
+<p><a th:href="@{/index}" >Back to Index</a></p>
+</body>
+</html>

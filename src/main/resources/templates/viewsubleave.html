@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>View Subordinate Leave</title>
+</head>
+<body>
+<p> You are logged in as <span th:text="${user.username}"></span></p>
+<table border="1">
+<tr>
+	<td>Employee Id</td>
+	<td>Start Date</td>
+	<td>End Date</td>
+	<td>Type</td>
+	<td>Reason</td>
+	<td>Status</td>
+	<td>Manager Comments</td>
+	<td>Actions</td>
+</tr>
+<tr th:each="leave : ${subleave}" >
+       <td th:text="${leave.employeeid}"></td>
+       <td th:text="${leave.startDate}"></td>
+       <td th:text="${leave.endDate}"></td>
+       <td th:text="${leave.leaveType}"></td>
+       <td th:text="${leave.reason}"></td>
+       <td th:text="${leave.status}"></td>
+       <td th:text="${leave.managerComment}"></td>
+       <td th:if="${leave.status == 'Applied' || leave.status == 'Updated'}">
+       <a th:href="@{'/approveform/'+${leave.leaveid}}">Approve</a><br />
+       <a th:href="@{'/rejectform/'+${leave.leaveid}}">Reject</a></td>
+</tr>
+</table>
+<p><a th:href="@{/index}" >Back to Index</a></p>
+</body>
+</html>
