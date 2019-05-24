@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Movement Register</title>
+</head>
+<body>
+
+<p>Movement Register for the month of <span th:text="${currentmonth}"></span>, <span th:text="${currentyear}"></span></p>
+
+<table border="1">
+<tr>
+	<th>Employee ID</th>
+	<th>Start Date</th>
+	<th>End Date</th>
+	<th>Type</th>
+</tr>
+<tr th:each="l : ${mregister}" >
+	   <td th:text="${l.employeeid}"></td>
+       <td th:text="${l.startDate}"></td>
+       <td th:text="${l.endDate}"></td>
+       <td th:text="${l.leaveType}"></td>
+</tr>
+</table>
+
+<p><a th:href="@{'/movementregister/'+${nextyear}+'/'+${nextmonth}}" >Next month</a></p>
+<p><a th:href="@{'/movementregister/'+${prevyear}+'/'+${prevmonth}}" >Previous month</a></p>
+
+<form action="/movementregister/" method="post">
+<p> Go to: <select id="month" name="month" required>
+	<option label="Select Month"></option>
+    <option th:value="0" th:text="January"></option>
+    <option th:value="1" th:text="February"></option>
+    <option th:value="2" th:text="March"></option>
+    <option th:value="3" th:text="April"></option>
+    <option th:value="4" th:text="May"></option>
+    <option th:value="5" th:text="June"></option>
+    <option th:value="6" th:text="July"></option>
+    <option th:value="7" th:text="August"></option>
+    <option th:value="8" th:text="September"></option>
+    <option th:value="9" th:text="October"></option>
+    <option th:value="10" th:text="November"></option>
+    <option th:value="11" th:text="December"></option>
+</select>
+<select id="year" name="year">
+    <option th:value="${currentyear}-2" th:text="${currentyear}-2"></option>
+    <option th:value="${currentyear}-1" th:text="${currentyear}-1"></option>
+    <option th:value="${currentyear}" th:text="${currentyear}" selected="selected"></option>
+    <option th:value="${currentyear}+1" th:text="${currentyear}+1"></option>
+    <option th:value="${currentyear}+2" th:text="${currentyear}+2"></option>
+</select>
+<input type="submit" value="Go"/>
+</p>
+
+</form>
+
+<p><a th:href="@{/index}" >Back to Index</a></p>
+</body>
+</html>

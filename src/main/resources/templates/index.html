@@ -15,6 +15,8 @@
 
 <p><a th:href="@{/viewpending}" th:if="${user.employeeType == 'Manager'}">View Pending Leave Applications</a></p>
 
+<p><a th:href="@{'/movementregister/'+${year}+'/'+${month}}" >View Movement Register</a></p>
+
 <p><a th:href="@{/logout}">Logout</a></p>
 </body>
 </html>

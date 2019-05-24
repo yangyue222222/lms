@@ -2,9 +2,12 @@ package iss.lms.controller;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -49,7 +52,7 @@ public class EmployeeController {
 		this.lr = lr;
 	}
 
-//___________________________________LOGIN FUNCTIONS___________________________________________
+	//___________________________________LOGIN FUNCTIONS___________________________________________
 	
 	@RequestMapping("/login")
 	public String login(Model model) {
@@ -129,7 +132,7 @@ public class EmployeeController {
 			}
 	}
 	
-//___________________________________ADMIN FUNCTIONS___________________________________________
+	//___________________________________ADMIN FUNCTIONS___________________________________________
 	
 	@RequestMapping("/admin")
 	public String admin(Model model, @CookieValue("admin") String id) {
@@ -141,7 +144,7 @@ public class EmployeeController {
 		model.addAttribute("managers", managers);
 		return "admin";
 	}
-		@PostMapping("/adduser")
+	@PostMapping("/adduser")
     public String adduser(Employee e) {
 
 		if(e.getManagerId()==0)	{
@@ -158,7 +161,7 @@ public class EmployeeController {
 		er.save(e);		
 		return "redirect:/admin";
     }
-		@PostMapping("/deleteuser")
+	@PostMapping("/deleteuser")
 	public String deleteuser(Employee e)
 	{
 		if(e.getEmployeeType().equals("Manager")) {
@@ -177,7 +180,7 @@ public class EmployeeController {
 
 	    return "redirect:/admin";
 	}
-		@PostMapping("/updateuser")
+	@PostMapping("/updateuser")
 	public String updateuser(Employee e)
 	{
 		if(e.getManagerId()==0)	{
@@ -187,12 +190,15 @@ public class EmployeeController {
 		 return "redirect:/admin";
 	}
 	
-//___________________________________EMPLOYEE FUNCTIONS___________________________________________
+	//___________________________________EMPLOYEE FUNCTIONS___________________________________________
 		
 	@RequestMapping("/index")
 	public String index(Model model, @CookieValue("id") String id) {
 		Employee e = er.findEmployeeById(Integer.parseInt(id));
 		model.addAttribute("user", e);
+		LocalDate now = LocalDate.now();
+		model.addAttribute("year",now.getYear());
+		model.addAttribute("month",now.getMonthValue()-1);
 		return "index";
 	}
 	@RequestMapping("/applyform")
@@ -203,7 +209,7 @@ public class EmployeeController {
 		model.addAttribute("errormsg","");
 		return "applyform";
 	}
-		@PostMapping("/apply")
+	@PostMapping("/apply")
 	public String applyLeave(@Valid @ModelAttribute("leave") Leave l, BindingResult br, Model model, @CookieValue("id") String id) {
 		Employee e = er.findEmployeeById(Integer.parseInt(id));
 		model.addAttribute("user", e);
@@ -234,8 +240,8 @@ public class EmployeeController {
 		model.addAttribute("leave", llist);
 		return "viewleave";
 	}
-
-		@RequestMapping("/updateform/{leaveId}")
+	
+	@RequestMapping("/updateform/{leaveId}")
 	public String updateForm(Model model, @CookieValue("id") String id, @PathVariable(value="leaveId") int leaveid, HttpSession session) {
 		Employee e = er.findEmployeeById(Integer.parseInt(id));
 		model.addAttribute("user", e);
@@ -243,7 +249,7 @@ public class EmployeeController {
 		model.addAttribute("leave", leave);
 		return "updateform";
 	}
-		@PostMapping("/update/{leaveId}")
+	@PostMapping("/update/{leaveId}")
 	public String updateLeave(@Valid Leave l, BindingResult br, Model model, @PathVariable(value="leaveId") int leaveid, @CookieValue("id") String id) {
 		
 		Employee e = er.findEmployeeById(Integer.parseInt(id));
@@ -300,7 +306,36 @@ public class EmployeeController {
 		return "redirect:/viewleave";
 	}
 	
-//___________________________________MANAGER FUNCTIONS___________________________________________	
+	@RequestMapping("/movementregister/{year}/{month}")
+	public String movementRegister(Model model, @CookieValue("id") String id,@PathVariable(value="year") int year,@PathVariable(value="month") int month) {
+		
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.YEAR, year);
+		c.set(Calendar.MONTH, month);
+		c.set(Calendar.DAY_OF_MONTH, 1);
+		LocalDate monthStart = c.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate monthEnd = monthStart.with(TemporalAdjusters.lastDayOfMonth());
+		List<Leave> allLeaves = lr.findAll();
+		ArrayList<Leave> monthlyLeave = new ArrayList<Leave>();
+		for(Leave l : allLeaves) {
+			if(!l.getStartDate().isAfter(monthEnd) && !l.getEndDate().isBefore(monthStart) && l.getStatus().equals("Approved"))
+				monthlyLeave.add(l);
+		}
+		model.addAttribute("mregister",monthlyLeave);	
+		model.addAttribute("currentmonth", monthStart.getMonth());
+		model.addAttribute("currentyear", monthStart.getYear());
+		model.addAttribute("nextyear",monthStart.plusMonths(1).getYear());
+		model.addAttribute("nextmonth",monthStart.plusMonths(1).getMonthValue()-1);
+		model.addAttribute("prevyear",monthStart.minusMonths(1).getYear());
+		model.addAttribute("prevmonth",monthStart.minusMonths(1).getMonthValue()-1);
+		return "movementregister";
+	}
+	@PostMapping("/movementregister")
+	public String movementRegisterJump(Model model, @CookieValue("id") String id, @ModelAttribute ("month") int month, @ModelAttribute("year") int year) {
+		return "redirect:/movementregister/"+year+"/"+month;
+	}
+	
+	//___________________________________MANAGER FUNCTIONS___________________________________________	
 	
 	@RequestMapping("/viewsubleave")
 	public String viewSubLeave(Model model, @CookieValue("id") String id) {
@@ -420,7 +455,7 @@ public class EmployeeController {
 		return "redirect:/viewsubleave";
 	}
 	
-//___________________________________UTILITY FUNCTIONS___________________________________________		
+	//___________________________________UTILITY FUNCTIONS___________________________________________		
 	
 	public int computeDays(Leave l)
 	{
@@ -439,10 +474,10 @@ public class EmployeeController {
 	public boolean processLeave(Leave l)
 	{
 		Employee e = er.findEmployeeById(l.getEmployeeid());
-		int daysLeave = computeDays(l);
+		double daysLeave = computeDays(l);
 		if(l.getLeaveType().equals("Annual")) {
 			if(e.getAnnualLeave() >= daysLeave) {
-				e.setAnnualLeave(e.getAnnualLeave() - daysLeave);
+				e.setAnnualLeave(e.getAnnualLeave() - (int)daysLeave);
 				er.save(e);
 				return true;
 				}
@@ -450,7 +485,7 @@ public class EmployeeController {
 		}
 		else if(l.getLeaveType().equals("Medical")) {
 			if(e.getMedicalLeave()>= daysLeave) {
-				e.setMedicalLeave(e.getMedicalLeave() - daysLeave);
+				e.setMedicalLeave(e.getMedicalLeave() - (int)daysLeave);
 				er.save(e);
 				return true;
 				}
@@ -468,12 +503,12 @@ public class EmployeeController {
 	}
 	public void refundLeave(Leave l) {
 		Employee e = er.findEmployeeById(l.getEmployeeid());
-		int daysLeave = computeDays(l);
+		double daysLeave = computeDays(l);
 		if(l.getLeaveType().equals("Annual")) {
-			e.setAnnualLeave(e.getAnnualLeave() + daysLeave);
+			e.setAnnualLeave(e.getAnnualLeave() + (int)daysLeave);
 		}
 		else if(l.getLeaveType().equals("Medical")) {
-			e.setMedicalLeave(e.getMedicalLeave() + daysLeave);
+			e.setMedicalLeave(e.getMedicalLeave() + (int)daysLeave);
 		}
 		else if(l.getLeaveType().equals("Compensation")) {
 			e.setCompLeave(e.getCompLeave() + daysLeave);
